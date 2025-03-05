@@ -6,8 +6,8 @@ interface MessageContent {
 }
 
 interface Message {
-  type: 'chat' | 'system';
-  content: string | MessageContent;
+  type: 'chat' | 'system' | 'users';
+  content: string | MessageContent | string[];
   user_id?: string;
   username?: string;
   messageType?: 'text' | 'gif';
@@ -17,6 +17,7 @@ export const useWebSocket = (baseUrl: string, username: string, shouldConnect: b
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [activeUsers, setActiveUsers] = useState<string[]>([]);
 
   useEffect(() => {
     if (!username || !shouldConnect) return;
@@ -31,11 +32,17 @@ export const useWebSocket = (baseUrl: string, username: string, shouldConnect: b
     ws.onclose = () => {
       setIsConnected(false);
       console.log('Disconnected from WebSocket');
+      setActiveUsers([]); // Clear users list on disconnect
     };
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      setMessages((prev) => [...prev, message]);
+      if (message.type === 'users') {
+        // Update active users list
+        setActiveUsers(message.content as string[]);
+      } else {
+        setMessages((prev) => [...prev, message]);
+      }
     };
 
     setSocket(ws);
@@ -64,5 +71,6 @@ export const useWebSocket = (baseUrl: string, username: string, shouldConnect: b
     messages,
     sendMessage,
     isConnected,
+    activeUsers,
   };
 }; 

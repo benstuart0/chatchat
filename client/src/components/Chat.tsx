@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { MessageInput } from '@/components/MessageInput';
+import { UserList } from '@/components/UserList';
 import Image from 'next/image';
 
 interface Message {
-  type: 'system' | 'chat';
-  content: string | { text?: string; gifUrl?: string };
+  type: 'system' | 'chat' | 'users';
+  content: string | { text?: string; gifUrl?: string } | string[];
   username?: string;
   messageType?: 'text' | 'gif';
 }
@@ -21,7 +22,7 @@ export function Chat() {
   const [username, setUsername] = useState('');
   const [hasJoined, setHasJoined] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { messages, sendMessage, isConnected } = useWebSocket(
+  const { messages, sendMessage, isConnected, activeUsers } = useWebSocket(
     WS_URL,
     username,
     hasJoined
@@ -49,11 +50,17 @@ export function Chat() {
       return <div>{String(message.content)}</div>;
     }
 
-    if (message.messageType === 'gif' && typeof message.content === 'object' && message.content.gifUrl) {
+    if (message.type === 'users') {
+      return null; // We don't render user list messages in the chat
+    }
+
+    const content = message.content as string | { text?: string; gifUrl?: string };
+
+    if (message.messageType === 'gif' && typeof content === 'object' && content.gifUrl) {
       return (
         <div className="max-w-sm">
           <Image 
-            src={message.content.gifUrl} 
+            src={content.gifUrl} 
             alt="GIF"
             width={300}
             height={200}
@@ -64,11 +71,11 @@ export function Chat() {
       );
     }
 
-    if (typeof message.content === 'string' && message.content.match(/\.gif$/i)) {
+    if (typeof content === 'string' && content.match(/\.gif$/i)) {
       return (
         <div className="max-w-sm">
           <Image 
-            src={message.content} 
+            src={content} 
             alt="GIF"
             width={300}
             height={200}
@@ -79,7 +86,7 @@ export function Chat() {
       );
     }
 
-    return <div>{typeof message.content === 'object' ? message.content.text : String(message.content)}</div>;
+    return <div>{typeof content === 'object' ? content.text : String(content)}</div>;
   };
 
   if (!hasJoined) {
@@ -113,48 +120,55 @@ export function Chat() {
   }
 
   return (
-    <div className="container mx-auto max-w-2xl p-4">
-      <Card className="p-4">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Chat Room</h2>
-            <div className="text-sm text-gray-500">
-              Chatting as <span className="font-medium">{username}</span>
-            </div>
-          </div>
-
-          <div className="h-[500px] overflow-y-auto space-y-4 p-4">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`p-2 rounded-lg ${
-                  msg.type === 'system'
-                    ? 'bg-gray-100 text-gray-600 text-center text-sm'
-                    : msg.username === username
-                    ? 'bg-blue-100 ml-auto max-w-[80%]'
-                    : 'bg-gray-100 max-w-[80%]'
-                }`}
-              >
-                {msg.type === 'chat' && (
-                  <div className="font-semibold text-sm text-gray-600">
-                    {msg.username}
-                  </div>
-                )}
-                {renderMessageContent(msg)}
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <MessageInput onSendMessage={sendMessage} disabled={!isConnected} />
-
-          {!isConnected && (
-            <div className="text-red-500 text-center">
-              Disconnected from server. Please refresh the page.
-            </div>
-          )}
+    <div className="container mx-auto max-w-6xl p-4">
+      <div className="flex gap-4">
+        <div className="w-64">
+          <UserList users={activeUsers} currentUser={username} />
         </div>
-      </Card>
+        <div className="flex-1">
+          <Card className="p-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Chat Room</h2>
+                <div className="text-sm text-gray-500">
+                  Chatting as <span className="font-medium">{username}</span>
+                </div>
+              </div>
+
+              <div className="h-[500px] overflow-y-auto space-y-4 p-4">
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`p-2 rounded-lg ${
+                      msg.type === 'system'
+                        ? 'bg-gray-100 text-gray-600 text-center text-sm'
+                        : msg.username === username
+                        ? 'bg-blue-100 ml-auto max-w-[80%]'
+                        : 'bg-gray-100 max-w-[80%]'
+                    }`}
+                  >
+                    {msg.type === 'chat' && (
+                      <div className="font-semibold text-sm text-gray-600">
+                        {msg.username}
+                      </div>
+                    )}
+                    {renderMessageContent(msg)}
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <MessageInput onSendMessage={sendMessage} disabled={!isConnected} />
+
+              {!isConnected && (
+                <div className="text-red-500 text-center">
+                  Disconnected from server. Please refresh the page.
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 } 
