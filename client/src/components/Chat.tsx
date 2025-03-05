@@ -4,6 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { MessageInput } from '@/components/MessageInput';
+import Image from 'next/image';
+
+interface Message {
+  type: 'system' | 'chat';
+  content: string | { text?: string; gifUrl?: string };
+  username?: string;
+  messageType?: 'text' | 'gif';
+}
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
 
@@ -34,20 +42,26 @@ export function Chat() {
     }
   };
 
-  const renderMessageContent = (message: any) => {
+  const renderMessageContent = (message: Message) => {
     if (message.type === 'system') {
-      return <div>{message.content}</div>;
+      return <div>{String(message.content)}</div>;
     }
 
-    if (message.messageType === 'gif' && typeof message.content === 'object') {
+    if (message.messageType === 'gif' && typeof message.content === 'object' && message.content.gifUrl) {
       return (
         <div className="max-w-sm">
-          <img src={message.content.gifUrl} alt="GIF" className="w-full rounded-lg" />
+          <Image 
+            src={message.content.gifUrl} 
+            alt="GIF" 
+            width={300}
+            height={200}
+            className="w-full rounded-lg"
+          />
         </div>
       );
     }
 
-    return <div>{typeof message.content === 'object' ? message.content.text : message.content}</div>;
+    return <div>{typeof message.content === 'object' ? message.content.text : String(message.content)}</div>;
   };
 
   if (!hasJoined) {
