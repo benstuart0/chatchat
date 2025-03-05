@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VERCEL: 1
+      NEXT_TELEMETRY_DISABLED: 1
 
     steps:
     - uses: actions/checkout@v4
@@ -33,9 +36,13 @@ jobs:
       working-directory: ./client
       run: npm run lint
 
-    - name: Build client
+    - name: Verify production build
       working-directory: ./client
-      run: npm run build
+      run: |
+        npm run build
+        # Verify that the build output contains the expected files
+        test -d .next || { echo "Build output directory .next not found"; exit 1; }
+        test -f .next/BUILD_ID || { echo "BUILD_ID not found in output"; exit 1; }
 
     - name: Set up Python
       uses: actions/setup-python@v5
