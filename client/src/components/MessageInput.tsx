@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
@@ -19,6 +19,22 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [gifSearchTerm, setGifSearchTerm] = useState('');
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside of pickers
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+        setShowGifPicker(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,29 +105,40 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
         </Button>
       </form>
 
-      {showEmojiPicker && (
-        <div className="absolute bottom-full mb-2">
-          <EmojiPicker onEmojiClick={onEmojiClick} />
-        </div>
-      )}
+      <div ref={pickerRef}>
+        {showEmojiPicker && (
+          <div className="absolute bottom-full mb-2">
+            <EmojiPicker onEmojiClick={onEmojiClick} />
+          </div>
+        )}
 
-      {showGifPicker && (
-        <div className="absolute bottom-full mb-2 bg-white rounded-lg shadow-lg p-4 w-[500px] max-h-[500px] overflow-y-auto">
-          <Input
-            value={gifSearchTerm}
-            onChange={(e) => setGifSearchTerm(e.target.value)}
-            placeholder="Search GIFs..."
-            className="mb-4"
-          />
-          <Grid
-            onGifClick={onGifClick}
-            fetchGifs={fetchGifs}
-            width={452}
-            columns={3}
-            gutter={6}
-          />
-        </div>
-      )}
+        {showGifPicker && (
+          <div className="absolute bottom-full mb-2 bg-white rounded-lg shadow-lg p-4 w-[500px] max-h-[500px] overflow-y-auto">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              setGifSearchTerm(gifSearchTerm);
+            }}>
+              <Input
+                value={gifSearchTerm}
+                onChange={(e) => setGifSearchTerm(e.target.value)}
+                placeholder="Search GIFs..."
+                className="mb-4"
+              />
+            </form>
+            <Grid
+              onGifClick={(gif: IGif, e: React.SyntheticEvent<HTMLElement, Event>) => {
+                e.preventDefault();
+                onGifClick(gif);
+              }}
+              fetchGifs={fetchGifs}
+              width={452}
+              columns={3}
+              gutter={6}
+              noLink={true}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 } 
