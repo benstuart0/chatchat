@@ -15,12 +15,6 @@ interface MessageInputProps {
   disabled: boolean;
 }
 
-interface MessagePreview {
-  type: 'text' | 'gif';
-  content: string;
-  gifUrl?: string;
-}
-
 export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
