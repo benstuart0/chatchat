@@ -11,7 +11,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ is commented out to allow client/src/lib
+# lib/
 lib64/
 parts/
 sdist/
@@ -35,7 +36,7 @@ yarn-error.log*
 # Next.js
 .next/
 out/
-build/
+# build/ is moved to avoid duplicate entries
 .vercel
 
 # IDE
@@ -59,9 +60,6 @@ build/
 # Logs
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Testing
 coverage/
@@ -74,4 +72,9 @@ dist/
 # Misc
 .DS_Store
 *.pem
-Thumbs.db 
+Thumbs.db
+
+# Explicitly track these files
+!client/package.json
+!client/package-lock.json
+!client/src/lib/ 
