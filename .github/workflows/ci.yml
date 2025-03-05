@@ -36,6 +36,24 @@ jobs:
       working-directory: ./client
       run: npm run lint
 
+    - name: Verify module resolution
+      working-directory: ./client
+      run: |
+        # Check if tsconfig.json exists and has proper path mappings
+        if [ -f "tsconfig.json" ]; then
+          echo "Verifying tsconfig.json path mappings..."
+          cat tsconfig.json | grep -A 5 "paths"
+        else
+          echo "tsconfig.json not found!"
+          exit 1
+        fi
+        
+        # Check for any @ imports that might cause issues
+        echo "Checking for potentially problematic imports..."
+        find src -type f -name "*.ts*" -exec grep -l "@/" {} \;
+        
+        # This will help catch module resolution issues before they hit Vercel
+
     - name: Verify production build
       working-directory: ./client
       run: |

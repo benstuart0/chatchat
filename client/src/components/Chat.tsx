@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { Card } from '@/components/ui/card';
+import { Card } from '../components/ui/card';
 import { DrawingBoard } from './DrawingBoard';
 import { MessageInput } from './MessageInput';
 import { UserList } from './UserList';

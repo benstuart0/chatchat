@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Chat } from '@/components/Chat';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { Chat } from '../components/Chat';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 // In development, use ws://localhost, in production use wss:// from env
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
