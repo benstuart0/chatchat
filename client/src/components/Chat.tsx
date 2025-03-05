@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { DrawingBoard } from './DrawingBoard';
 import { MessageInput } from './MessageInput';
 import { UserList } from './UserList';
+import styles from './Chat.module.css';
 
 interface Point {
   x: number;
@@ -56,12 +57,12 @@ export function Chat({ username, messages, users, isConnected, onSendMessage, on
       const content = msg.content as MessageContent;
       if (content.gifUrl) {
         return (
-          <div className="relative w-48 h-48">
+          <div className={styles.imageContainer}>
             <Image
               src={content.gifUrl}
               alt="GIF"
               fill
-              className="object-cover rounded"
+              className={styles.image}
             />
           </div>
         );
@@ -72,57 +73,55 @@ export function Chat({ username, messages, users, isConnected, onSendMessage, on
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <div className="grid grid-cols-[1fr,200px] gap-4 p-4">
-        <div className="space-y-4">
-          <div className="flex gap-4 border-b">
+    <div className={styles.container}>
+      <div className={styles.grid}>
+        <div className={styles.space}>
+          <div className={styles.tabs}>
             <button
-              className={`px-4 py-2 ${activeTab === 'chat' ? 'border-b-2 border-blue-500' : ''}`}
+              className={activeTab === 'chat' ? styles.activeTab : styles.tab}
               onClick={() => setActiveTab('chat')}
             >
               Chat
             </button>
             <button
-              className={`px-4 py-2 ${activeTab === 'draw' ? 'border-b-2 border-blue-500' : ''}`}
+              className={activeTab === 'draw' ? styles.activeTab : styles.tab}
               onClick={() => setActiveTab('draw')}
             >
               Draw
             </button>
           </div>
           {activeTab === 'chat' ? (
-            <div className="space-y-4">
-              <div className="h-[500px] overflow-y-auto space-y-4 p-4">
-                {messages
-                  .filter(msg => msg.type === 'chat' || msg.type === 'system')
-                  .map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`p-2 rounded-lg ${
-                        msg.type === 'system'
-                          ? 'bg-gray-100 text-gray-600 text-center text-sm'
-                          : msg.username === username
-                          ? 'bg-blue-100 ml-auto max-w-[80%]'
-                          : 'bg-gray-100 max-w-[80%]'
-                      }`}
-                    >
-                      {msg.type === 'chat' && (
-                        <div className="font-semibold text-sm text-gray-600">
-                          {msg.username}
-                        </div>
-                      )}
-                      {renderMessageContent(msg)}
-                    </div>
-                  ))}
-                <div ref={messagesEndRef} />
-              </div>
-              <MessageInput onSendMessage={onSendMessage} disabled={!isConnected} />
+            <div className={styles.messagesContainer}>
+              {messages
+                .filter(msg => msg.type === 'chat' || msg.type === 'system')
+                .map((msg, index) => (
+                  <div
+                    key={index}
+                    className={
+                      msg.type === 'system'
+                        ? styles.systemMessage
+                        : msg.username === username
+                        ? styles.userMessage
+                        : styles.otherMessage
+                    }
+                  >
+                    {msg.type === 'chat' && (
+                      <div className={styles.username}>
+                        {msg.username}
+                      </div>
+                    )}
+                    {renderMessageContent(msg)}
+                  </div>
+                ))}
+              <div ref={messagesEndRef} />
             </div>
           ) : (
             <DrawingBoard onDraw={onDraw} messages={messages} />
           )}
+          <MessageInput onSendMessage={onSendMessage} disabled={!isConnected} />
         </div>
         <UserList users={users} />
       </div>
-    </Card>
+    </div>
   );
 } 
