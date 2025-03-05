@@ -4,6 +4,6 @@ echo "Running client-side linting..."
 cd client && npm run lint:fix || { echo "Client linting failed"; exit 1; }
 
 echo "Running server-side Ruff checks..."
-cd ../server && python3 -m ruff check --fix . || { echo "Server Ruff checks failed"; exit 1; }
+cd ../server && python3.9 -m ruff check --fix . || { echo "Server Ruff checks failed"; exit 1; }
 
 echo "All checks passed!"
