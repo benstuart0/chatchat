@@ -5,12 +5,23 @@ interface MessageContent {
   gifUrl?: string;
 }
 
+interface DrawContent {
+  points: Point[];
+  color: string;
+  clear?: boolean;
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
 interface Message {
-  type: 'chat' | 'system' | 'users';
-  content: string | MessageContent | string[];
+  type: 'chat' | 'system' | 'users' | 'draw';
+  content: string | MessageContent | string[] | DrawContent;
   user_id?: string;
   username?: string;
-  messageType?: 'text' | 'gif';
+  messageType?: 'text' | 'gif' | 'draw';
 }
 
 export const useWebSocket = (baseUrl: string, username: string, shouldConnect: boolean) => {
@@ -53,11 +64,11 @@ export const useWebSocket = (baseUrl: string, username: string, shouldConnect: b
   }, [baseUrl, username, shouldConnect]);
 
   const sendMessage = useCallback(
-    (content: string | MessageContent, messageType: 'text' | 'gif' = 'text') => {
+    (content: string | MessageContent | DrawContent, messageType: 'text' | 'gif' | 'draw' = 'text') => {
       if (socket && isConnected) {
         socket.send(
           JSON.stringify({
-            type: 'chat',
+            type: messageType === 'draw' ? 'draw' : 'chat',
             content,
             messageType,
           })

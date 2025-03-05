@@ -1,6 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 import json
 import logging
 import os
@@ -31,12 +31,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Store active connections
+# Store active connections and drawing state
 class ConnectionManager:
     def __init__(self):
         # (websocket, username, join_time)
         self.active_connections: Dict[str, Tuple[WebSocket, str, datetime]] = {}
         self.user_count = 0
+        self.drawing_state: List[Dict[str, Any]] = []  # Store drawing history
 
     async def connect(self, websocket: WebSocket, username: str) -> str:
         await websocket.accept()
@@ -45,6 +46,13 @@ class ConnectionManager:
         join_time = datetime.now()
         self.active_connections[user_id] = (websocket, username, join_time)
         logger.info(f"New connection: {username} (ID: {user_id}) (Total users: {len(self.active_connections)})")
+        # Send current drawing state to new user
+        if self.drawing_state:
+            await websocket.send_json({
+                "type": "draw",
+                "content": self.drawing_state[-1],  # Send the latest state
+                "messageType": "draw"
+            })
         # Broadcast updated user list
         await self.broadcast_user_list()
         return user_id
@@ -71,6 +79,13 @@ class ConnectionManager:
 
     async def broadcast(self, message: dict):
         logger.info(f"Broadcasting message: {message}")
+        # Store drawing state if it's a drawing message
+        if message.get("type") == "draw":
+            if message.get("content", {}).get("clear"):
+                self.drawing_state = []
+            else:
+                self.drawing_state.append(message["content"])
+        
         for websocket, _, _ in self.active_connections.values():
             await websocket.send_json(message)
 
@@ -100,7 +115,10 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 # Add user info to the message
                 message["user_id"] = user_id
                 message["username"] = username
-                logger.info(f"Message from {username}: {message['content']}")
+                if message.get("type") == "draw":
+                    logger.info(f"Drawing from {username}")
+                else:
+                    logger.info(f"Message from {username}: {message['content']}")
                 await manager.broadcast(message)
             except json.JSONDecodeError:
                 logger.error(f"Invalid message format from {username}: {data}")

@@ -5,14 +5,26 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { MessageInput } from '@/components/MessageInput';
 import { UserList } from '@/components/UserList';
+import { TabNavigation } from '@/components/TabNavigation';
+import { DrawingBoard } from '@/components/DrawingBoard';
 import Image from 'next/image';
 
 interface Message {
-  type: 'system' | 'chat' | 'users';
-  content: string | { text?: string; gifUrl?: string } | string[];
+  type: 'system' | 'chat' | 'users' | 'draw';
+  content: string | { text?: string; gifUrl?: string } | string[] | { points: Point[]; color: string; clear?: boolean };
   username?: string;
-  messageType?: 'text' | 'gif';
+  messageType?: 'text' | 'gif' | 'draw';
 }
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+const TABS = [
+  { id: 'chat', label: 'Chat' },
+  { id: 'draw', label: 'Draw' },
+];
 
 // In development, use ws://localhost, in production use wss:// from env
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
@@ -21,6 +33,7 @@ console.log('WebSocket URL:', WS_URL); // Debugging line to verify the URL
 export function Chat() {
   const [username, setUsername] = useState('');
   const [hasJoined, setHasJoined] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, sendMessage, isConnected, activeUsers } = useWebSocket(
     WS_URL,
@@ -29,12 +42,14 @@ export function Chat() {
   );
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (activeTab === 'chat') {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, activeTab]);
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +58,10 @@ export function Chat() {
       setUsername(trimmedUsername);
       setHasJoined(true);
     }
+  };
+
+  const handleDraw = (drawData: { points: Point[]; color: string; clear?: boolean }) => {
+    sendMessage(drawData, 'draw');
   };
 
   const renderMessageContent = (message: Message) => {
@@ -87,6 +106,50 @@ export function Chat() {
     }
 
     return <div>{typeof content === 'object' ? content.text : String(content)}</div>;
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'chat':
+        return (
+          <div className="space-y-4">
+            <div className="h-[500px] overflow-y-auto space-y-4 p-4">
+              {messages
+                .filter(msg => msg.type === 'chat' || msg.type === 'system')
+                .map((msg, index) => (
+                <div
+                  key={index}
+                  className={`p-2 rounded-lg ${
+                    msg.type === 'system'
+                      ? 'bg-gray-100 text-gray-600 text-center text-sm'
+                      : msg.username === username
+                      ? 'bg-blue-100 ml-auto max-w-[80%]'
+                      : 'bg-gray-100 max-w-[80%]'
+                  }`}
+                >
+                  {msg.type === 'chat' && (
+                    <div className="font-semibold text-sm text-gray-600">
+                      {msg.username}
+                    </div>
+                  )}
+                  {renderMessageContent(msg)}
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+            <MessageInput onSendMessage={sendMessage} disabled={!isConnected} />
+          </div>
+        );
+      case 'draw':
+        return (
+          <DrawingBoard
+            onDraw={handleDraw}
+            messages={messages}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   if (!hasJoined) {
@@ -135,30 +198,13 @@ export function Chat() {
                 </div>
               </div>
 
-              <div className="h-[500px] overflow-y-auto space-y-4 p-4">
-                {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`p-2 rounded-lg ${
-                      msg.type === 'system'
-                        ? 'bg-gray-100 text-gray-600 text-center text-sm'
-                        : msg.username === username
-                        ? 'bg-blue-100 ml-auto max-w-[80%]'
-                        : 'bg-gray-100 max-w-[80%]'
-                    }`}
-                  >
-                    {msg.type === 'chat' && (
-                      <div className="font-semibold text-sm text-gray-600">
-                        {msg.username}
-                      </div>
-                    )}
-                    {renderMessageContent(msg)}
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
+              <TabNavigation
+                tabs={TABS}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+              />
 
-              <MessageInput onSendMessage={sendMessage} disabled={!isConnected} />
+              {renderTabContent()}
 
               {!isConnected && (
                 <div className="text-red-500 text-center">
