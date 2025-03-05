@@ -1,5 +1,8 @@
 #!/bin/sh
 
+echo "Running client-side dependency check..."
+cd client && npm install --package-lock-only || { echo "Client dependency check failed"; exit 1; }
+
 echo "Running client-side linting..."
 cd client && npm run lint:fix || { echo "Client linting failed"; exit 1; }
 

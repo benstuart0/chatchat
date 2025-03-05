@@ -4,9 +4,10 @@
   "workspaces": ["client"],
   "scripts": {
     "prepare": "husky",
-    "build": "cd client && npm install && npm run build",
-    "lint": "cd client && npm run lint",
-    "lint:fix": "cd client && npm run lint:fix"
+    "build": "npm -w client run build",
+    "lint": "npm -w client run lint",
+    "lint:fix": "npm -w client run lint:fix",
+    "install-deps": "npm install && npm -w client install"
   },
   "devDependencies": {
     "husky": "^9.1.0"
