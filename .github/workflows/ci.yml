@@ -55,5 +55,6 @@ jobs:
       run: python -m ruff check .
 
     - name: Test server startup
+      working-directory: ./server
       run: |
         timeout 5 uvicorn main:app || code=$?; if [ $code -eq 124 ]; then exit 0; else exit $code; fi 
