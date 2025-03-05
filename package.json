@@ -3,7 +3,7 @@
   "private": true,
   "workspaces": ["client"],
   "scripts": {
-    "prepare": "husky",
+    "prepare": "[ -n \"$CI\" ] || [ -n \"$VERCEL\" ] || husky",
     "build": "npm -w client run build",
     "lint": "npm -w client run lint",
     "lint:fix": "npm -w client run lint:fix",
