@@ -8,5 +8,6 @@
     "deploymentEnabled": {
       "main": true
     }
-  }
+  },
+  "root": "client"
 } 
