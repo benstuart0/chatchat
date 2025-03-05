@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { DrawingBoard } from './DrawingBoard';
 import { MessageInput } from './MessageInput';
@@ -56,10 +57,11 @@ export function Chat({ username, messages, users, isConnected, onSendMessage, on
       if (content.gifUrl) {
         return (
           <div className="relative w-48 h-48">
-            <img
+            <Image
               src={content.gifUrl}
               alt="GIF"
-              className="w-full h-full object-cover rounded"
+              fill
+              className="object-cover rounded"
             />
           </div>
         );
