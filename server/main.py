@@ -17,12 +17,15 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # Get allowed origins from environment variable or use default
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,https://*.vercel.app"
+).split(",")
 
-# Enable CORS
+# Enable CORS with more permissive settings for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"] if any("vercel.app" in origin for origin in ALLOWED_ORIGINS) else ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
