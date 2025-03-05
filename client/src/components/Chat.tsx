@@ -13,7 +13,9 @@ interface Message {
   messageType?: 'text' | 'gif';
 }
 
+// In development, use ws://localhost, in production use wss:// from env
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
+console.log('WebSocket URL:', WS_URL); // Debugging line to verify the URL
 
 export function Chat() {
   const [username, setUsername] = useState('');
@@ -52,10 +54,26 @@ export function Chat() {
         <div className="max-w-sm">
           <Image 
             src={message.content.gifUrl} 
-            alt="GIF" 
+            alt="GIF"
             width={300}
             height={200}
             className="w-full rounded-lg"
+            unoptimized
+          />
+        </div>
+      );
+    }
+
+    if (typeof message.content === 'string' && message.content.match(/\.gif$/i)) {
+      return (
+        <div className="max-w-sm">
+          <Image 
+            src={message.content} 
+            alt="GIF"
+            width={300}
+            height={200}
+            className="w-full rounded-lg"
+            unoptimized
           />
         </div>
       );
