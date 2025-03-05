@@ -13,9 +13,21 @@ interface DrawEvent {
   clear?: boolean;
 }
 
+interface MessageContent {
+  text?: string;
+  gifUrl?: string;
+}
+
+interface Message {
+  type: 'draw' | 'chat' | 'system' | 'users';
+  content: string | DrawEvent | MessageContent | string[];
+  username?: string;
+  messageType?: 'text' | 'gif' | 'draw';
+}
+
 interface DrawingBoardProps {
   onDraw: (data: DrawEvent) => void;
-  messages: any[];
+  messages: Message[];
 }
 
 export function DrawingBoard({ onDraw, messages }: DrawingBoardProps) {
@@ -41,7 +53,7 @@ export function DrawingBoard({ onDraw, messages }: DrawingBoardProps) {
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-  }, []);
+  }, [currentColor]);
 
   // Handle receiving draw data from other users
   useEffect(() => {
