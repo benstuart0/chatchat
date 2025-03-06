@@ -1,6 +1,6 @@
 :root {
   --max-width: 1100px;
-  --border-radius: 12px;
+  --border-radius: 0.5rem;
   --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
     'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',
     'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
@@ -11,24 +11,39 @@
   --background-end-rgb: 255, 255, 255;
 
   /* Theme colors */
-  --primary-color: #0070f3;
-  --primary-hover: #0051a2;
-  --secondary-color: #7928ca;
-  --secondary-hover: #5c1e9e;
-  --accent-color: #79ffe1;
-  --border-color: #eaeaea;
-  --text-color: #333;
-  --muted-text: #666;
-
-  /* Component colors */
+  --primary-color: #6b8afd;
+  --primary-color-dark: #5470e6;
+  --primary-color-alpha: rgba(107, 138, 253, 0.2);
+  --secondary-color: #9b6bfd;
+  --text-color: #2d3748;
+  --text-muted: #718096;
+  --heading-color: #1a202c;
+  --label-color: #4a5568;
+  
+  /* Backgrounds */
+  --bg-gradient: linear-gradient(to bottom right, #f0f4ff, #fff5f5);
   --card-bg: white;
-  --card-border: var(--border-color);
+  --card-header-bg: #f7faff;
+  --chat-bg: #fafafa;
+  --system-message-bg: #f3f4f6;
+  --hover-bg: #edf2ff;
   --input-bg: white;
-  --input-border: var(--border-color);
-  --button-bg: var(--primary-color);
-  --button-text: white;
-  --tab-active-border: var(--primary-color);
-  --system-message-bg: #f0f0f0;
+  
+  /* Borders */
+  --border-color: #e2e8f0;
+  --input-border: #cbd5e0;
+  --border-radius-lg: 0.75rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+
+  /* Message Colors */
+  --message-primary: #6b8afd;
+  --message-secondary: #9b6bfd;
+  --message-system: #f3f4f6;
+  --message-text: white;
+  --message-system-text: #718096;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,9 +69,11 @@
 html,
 body {
   max-width: 100vw;
+  min-height: 100vh;
   overflow-x: hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 body {
@@ -79,8 +96,8 @@ a:hover {
 }
 
 button {
-  background: var(--button-bg);
-  color: var(--button-text);
+  background: var(--primary-color);
+  color: white;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: var(--border-radius);
@@ -90,7 +107,7 @@ button {
 }
 
 button:hover {
-  background: var(--primary-hover);
+  background: var(--primary-color-dark);
 }
 
 input, textarea {
@@ -107,4 +124,23 @@ input, textarea {
 input:focus, textarea:focus {
   outline: none;
   border-color: var(--primary-color);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }

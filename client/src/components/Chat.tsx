@@ -34,7 +34,7 @@ interface ChatProps {
   messages: Message[];
   users: string[];
   isConnected: boolean;
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, type?: 'text' | 'gif') => void;
   onDraw: (data: DrawEvent) => void;
 }
 
@@ -54,26 +54,58 @@ export function Chat({ username, messages, users, isConnected, onSendMessage, on
 
   const renderMessageContent = (msg: Message) => {
     if (msg.type === 'chat') {
-      const content = msg.content as MessageContent;
-      if (content.gifUrl) {
+      if (msg.messageType === 'gif') {
         return (
           <div className={styles.imageContainer}>
-            <Image
-              src={content.gifUrl}
+            <img
+              src={msg.content as string}
               alt="GIF"
-              fill
               className={styles.image}
             />
           </div>
         );
       }
-      return <div>{content.text}</div>;
+
+      const content = msg.content as MessageContent | string;
+      
+      if (typeof content === 'string') {
+        try {
+          const parsed = JSON.parse(content);
+          if (parsed.gifUrl) {
+            return (
+              <div className={styles.imageContainer}>
+                <img
+                  src={parsed.gifUrl}
+                  alt="GIF"
+                  className={styles.image}
+                />
+              </div>
+            );
+          }
+        } catch (e) {
+          return <div style={{ wordBreak: 'break-word' }}>{content}</div>;
+        }
+      }
+
+      if (typeof content === 'object' && 'gifUrl' in content && content.gifUrl) {
+        return (
+          <div className={styles.imageContainer}>
+            <img
+              src={content.gifUrl}
+              alt="GIF"
+              className={styles.image}
+            />
+          </div>
+        );
+      }
+
+      return <div style={{ wordBreak: 'break-word' }}>{typeof content === 'string' ? content : content.text}</div>;
     }
-    return <div>{msg.content as string}</div>;
+    return <div style={{ wordBreak: 'break-word' }}>{msg.content as string}</div>;
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} key="chat-container">
       <div className={styles.grid}>
         <div className={styles.space}>
           <div className={styles.tabs}>

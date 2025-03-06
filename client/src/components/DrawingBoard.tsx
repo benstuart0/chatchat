@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
+import styles from './DrawingBoard.module.css';
 
 interface Point {
   x: number;
@@ -158,29 +159,27 @@ export function DrawingBoard({ onDraw, messages }: DrawingBoardProps) {
   };
 
   return (
-    <Card className="p-4">
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <input
-            type="color"
-            value={currentColor}
-            onChange={(e) => setCurrentColor(e.target.value)}
-            className="w-8 h-8"
-          />
-          <Button variant="outline" onClick={clearCanvas}>
-            Clear Canvas
-          </Button>
-        </div>
-        <div className="border rounded-lg overflow-hidden">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-[500px] bg-white cursor-crosshair"
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseOut={stopDrawing}
-          />
-        </div>
+    <Card className={styles.container}>
+      <div className={styles.controls}>
+        <input
+          type="color"
+          value={currentColor}
+          onChange={(e) => setCurrentColor(e.target.value)}
+          className={styles.colorPicker}
+        />
+        <Button variant="outline" onClick={clearCanvas}>
+          Clear Canvas
+        </Button>
+      </div>
+      <div className={styles.canvasWrapper}>
+        <canvas
+          ref={canvasRef}
+          className={styles.canvas}
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseOut={stopDrawing}
+        />
       </div>
     </Card>
   );

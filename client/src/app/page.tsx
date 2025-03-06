@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Chat } from '../components/Chat';
 import { useWebSocket } from '../hooks/useWebSocket';
+import styles from './page.module.css';
 
 // In development, use ws://localhost, in production use wss:// from env
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
@@ -35,39 +36,34 @@ export default function Home() {
 
   if (!hasJoined) {
     return (
-      <div className="min-h-screen bg-gray-100 py-8">
-        <div className="container mx-auto max-w-md p-4">
-          <form onSubmit={handleJoin} className="space-y-4 bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold text-center mb-6">Join Chat</h2>
-            <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium">
-                Choose your username
-              </label>
-              <input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username..."
-                className="w-full px-3 py-2 border rounded-md"
-                minLength={2}
-                maxLength={20}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
-            >
-              Join Chat
-            </button>
-          </form>
-        </div>
+      <div className={styles.container}>
+        <form onSubmit={handleJoin} className={styles.loginForm}>
+          <h2 className={styles.title}>Welcome to Chat</h2>
+          <div className={styles.inputGroup}>
+            <label htmlFor="username" className={styles.label}>
+              Choose your username
+            </label>
+            <input
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username..."
+              className={styles.input}
+              minLength={2}
+              maxLength={20}
+              required
+            />
+          </div>
+          <button type="submit" className={styles.button} disabled={!username.trim()}>
+            Join Chat
+          </button>
+        </form>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 py-8">
+    <main className={styles.container}>
       <Chat
         username={username}
         messages={messages}

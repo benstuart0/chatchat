@@ -1,4 +1,5 @@
 import { Card } from './ui/card';
+import styles from './Chat.module.css';
 
 interface UserListProps {
   users: string[];
@@ -6,18 +7,20 @@ interface UserListProps {
 
 export function UserList({ users }: UserListProps) {
   return (
-    <Card className="p-4">
-      <h3 className="font-semibold mb-2">Active Users ({users.length})</h3>
-      <div className="space-y-1">
-        {users.map((user, index) => (
-          <div
-            key={index}
-            className="text-sm py-1 px-2 rounded bg-gray-100"
-          >
-            {user}
-          </div>
-        ))}
+    <div className={styles.usersList}>
+      <div className={styles.usersTitle}>
+        Active Users <span className={styles.userCount}>{users.length}</span>
       </div>
-    </Card>
+      <ul>
+        {users.map((user, index) => (
+          <li key={index} className={styles.userItem}>
+            <div className={styles.userAvatar}>
+              {user.charAt(0).toUpperCase()}
+            </div>
+            {user}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 } 
